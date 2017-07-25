@@ -34,6 +34,7 @@ app.get('/api/books', function (req, res) {
 // get one book
 app.get('/api/books/:id', function (req, res) {
   // find one book by its id
+  
   db.Book.findById(req.params.id, function(err, book){
     if (err) { return console.log("show error: " + err); }
     res.json(book);
@@ -43,7 +44,14 @@ app.get('/api/books/:id', function (req, res) {
 // create new book
 app.post('/api/books', function (req, res) {
   // create new book with form data (`req.body`)
-  var newBook = new db.Book(req.body);
+  var newBook = new db.Book({
+    title : req.body.title,
+    image : req.body.image,
+    releaseDate : req.body.releaseDate,
+  });
+  db.Author.findOne({name: req.body.author},function(err, author){
+    newBook.author = author;
+  });
   // add newBook to database
   newBook.save(function(err, book){
     if (err) { return console.log("create error: " + err); }
