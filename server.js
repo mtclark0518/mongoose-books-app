@@ -1,6 +1,7 @@
 // server.js
 // SERVER-SIDE JAVASCRIPT
 
+var db = require('./models');
 
 /////////////////////////////
 //  SETUP and CONFIGURATION
@@ -20,41 +21,6 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-
-////////////////////
-//  DATA
-///////////////////
-
-var books = [
-  {
-    _id: 15,
-    title: "The Four Hour Workweek",
-    author: "Tim Ferriss",
-    image: "https://s3-us-west-2.amazonaws.com/sandboxapi/four_hour_work_week.jpg",
-    release_date: "April 1, 2007"
-  },
-  {
-    _id: 16,
-    title: "Of Mice and Men",
-    author: "John Steinbeck",
-    image: "https://s3-us-west-2.amazonaws.com/sandboxapi/of_mice_and_men.jpg",
-    release_date: "Unknown 1937"
-  },
-  {
-    _id: 17,
-    title: "Romeo and Juliet",
-    author: "William Shakespeare",
-    image: "https://s3-us-west-2.amazonaws.com/sandboxapi/romeo_and_juliet.jpg",
-    release_date: "Unknown 1597"
-  }
-];
-
-
-
-
-
-
-
 ////////////////////
 //  ROUTES
 ///////////////////
@@ -67,23 +33,26 @@ app.get('/', function (req, res) {
   res.sendFile('views/index.html' , { root : __dirname});
 });
 
-// get all books
+
+//////////////////////////////////////////
+// GET all books
 app.get('/api/books', function (req, res) {
-  // send all books as JSON response
-  console.log('books index');
-  res.json(books);
+  //get books from db
+  db.Book.find(function(err, books) {
+    //if error tell me
+    if(err) {return console.log('error: ' + err); }
+    //send all books as a json response
+    res.json(books);
+  });
 });
 
 // get one book
 app.get('/api/books/:id', function (req, res) {
   // find one book by its id
-  console.log('books show', req.params);
-  for(var i=0; i < books.length; i++) {
-    if (books[i]._id === req.params.id) {
-      res.json(books[i]);
-      break; // we found the right book, we can stop searching
-    }
-  }
+  db.Book.findById(req.params.id, function(err, book){
+    if(err){return console.log('error: ' + err);}
+    res.json(book);
+  });
 });
 
 // create new book
